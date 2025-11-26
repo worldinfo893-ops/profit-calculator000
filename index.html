@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>মুনাফা ক্যালকুলেটর - ৩ মাসের হিসাব (১০% ট্যাক্স)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 42px;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 18px;
+            opacity: 0.95;
+        }
+        
+        .main-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+        
+        .calculator-section {
+            padding: 40px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 20%);
+        }
+        
+        .input-group {
+            margin-bottom: 25px;
+        }
+        
+        .input-group label {
+            display: block;
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .input-wrapper {
+            position: relative;
+        }
+        
+        .input-wrapper input {
+            width: 100%;
+            padding: 18px 20px;
+            font-size: 24px;
+            border: 3px solid #e0e0e0;
+            border-radius: 12px;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        
+        .input-wrapper input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 5px rgba(102, 126, 234, 0.1);
+        }
+        
+        .currency-symbol {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 24px;
+            color: #666;
+            font-weight: 600;
+            pointer-events: none;
+        }
+        
+        .input-wrapper input {
+            padding-left: 50px;
+        }
+        
+        .calculate-btn {
+            width: 100%;
+            padding: 20px;
+            font-size: 22px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .calculate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.5);
+        }
+        
+        .calculate-btn:active {
+            transform: translateY(-1px);
+        }
+        
+        .results {
+            padding: 40px;
+            display: none;
+        }
+        
+        .results.show {
+            display: block;
+            animation: fadeIn 0.6s;
+        }
+        
+        @keyframes fadeIn {
+            from { 
+                opacity: 0; 
+                transform: translateY(30px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+        
+        .results-title {
+            text-align: center;
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 30px;
+            font-weight: 700;
+        }
+        
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .result-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        
+        .result-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .result-card h3 {
+            font-size: 15px;
+            color: #666;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .result-card .value {
+            font-size: 26px;
+            font-weight: 700;
+            color: #333;
+        }
+        
+        .result-card.primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            grid-column: 1 / -1;
+        }
+        
+        .result-card.primary h3 {
+            color: rgba(255,255,255,0.95);
+            font-size: 18px;
+        }
+        
+        .result-card.primary .value {
+            color: white;
+            font-size: 42px;
+        }
+        
+        .result-card.success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            grid-column: 1 / -1;
+        }
+        
+        .result-card.success h3 {
+            color: rgba(255,255,255,0.95);
+            font-size: 18px;
+        }
+        
+        .result-card.success .value {
+            color: white;
+            font-size: 38px;
+        }
+        
+        .info-note {
+            background: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 25px;
+            font-size: 15px;
+            color: #856404;
+            line-height: 1.6;
+        }
+        
+        .info-note strong {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 16px;
+        }
+        
+        .rate-table-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .rate-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        
+        .rate-header h2 {
+            font-size: 26px;
+        }
+        
+        .table-wrapper {
+            padding: 30px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 18px;
+            text-align: left;
+            border-bottom: 2px solid #e0e0e0;
+            font-size: 16px;
+        }
+        
+        th {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            font-weight: 700;
+            color: #333;
+        }
+        
+        td {
+            font-weight: 500;
+        }
+        
+        td:last-child {
+            text-align: right;
+            font-weight: 700;
+            color: #667eea;
+            font-size: 18px;
+        }
+        
+        tr:last-child td {
+            border-bottom: none;
+        }
+        
+        tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 30px;
+            padding: 20px;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .terms-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+        
+        .terms-header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        
+        .terms-header h2 {
+            font-size: 26px;
+        }
+        
+        .terms-content {
+            padding: 35px;
+            line-height: 1.8;
+        }
+        
+        .terms-content p {
+            margin-bottom: 15px;
+            font-size: 16px;
+            color: #333;
+            text-align: justify;
+        }
+        
+        .terms-content ul {
+            margin: 20px 0;
+            padding-left: 25px;
+        }
+        
+        .terms-content li {
+            margin-bottom: 15px;
+            font-size: 16px;
+            color: #444;
+            line-height: 1.7;
+        }
+        
+        .terms-content strong {
+            color: #667eea;
+            font-weight: 700;
+        }
+        
+        .example-box {
+            background: #e8f5e9;
+            border-left: 5px solid #4caf50;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .example-box strong {
+            color: #2e7d32;
+            display: block;
+            margin-bottom: 10px;
+            font-size: 17px;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 32px;
+            }
+            
+            .calculator-section, .results, .table-wrapper {
+                padding: 25px;
+            }
+            
+            .result-card .value {
+                font-size: 22px;
+            }
+            
+            .result-card.primary .value {
+                font-size: 32px;
+            }
+            
+            .result-card.success .value {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💰 মুনাফা ক্যালকুলেটর</h1>
+            <p>৩ মাসের মুনাফা হিসাব করুন (১০% ট্যাক্স বাদে)</p>
+        </div>
+        
+        <div class="main-card">
+            <div class="calculator-section">
+                <div class="input-group">
+                    <label for="amount">আপনার বিনিয়োগের পরিমাণ লিখুন:</label>
+                    <div class="input-wrapper">
+                        <span class="currency-symbol">৳</span>
+                        <input type="number" id="amount" placeholder="100000" min="0" step="0.01">
+                    </div>
+                </div>
+                
+                <button class="calculate-btn" onclick="calculateProfit()">
+                    ৩ মাসের মুনাফা হিসাব করুন →
+                </button>
+            </div>
+            
+            <div class="results" id="results">
+                <h2 class="results-title">📊 আপনার হিসাবের ফলাফল</h2>
+                
+                <div class="grid-3">
+                    <div class="result-card">
+                        <h3>মূল পরিমাণ</h3>
+                        <div class="value" id="principalAmount">৳ 0.00</div>
+                    </div>
+                    
+                    <div class="result-card">
+                        <h3>প্রযোজ্য হার</h3>
+                        <div class="value" id="rateValue">0%</div>
+                    </div>
+                    
+                    <div class="result-card">
+                        <h3>বার্ষিক মুনাফা</h3>
+                        <div class="value" id="yearlyProfit">৳ 0.00</div>
+                    </div>
+                </div>
+                
+                <div class="grid-3">
+                    <div class="result-card">
+                        <h3>ট্যাক্স (১০%)</h3>
+                        <div class="value" id="taxAmount">৳ 0.00</div>
+                    </div>
+                    
+                    <div class="result-card">
+                        <h3>ট্যাক্স বাদে বার্ষিক মুনাফা</h3>
+                        <div class="value" id="profitAfterTax">৳ 0.00</div>
+                    </div>
+                    
+                    <div class="result-card">
+                        <h3>মাসে কত টাকা মুনাফা</h3>
+                        <div class="value" id="monthlyProfit">৳ 0.00</div>
+                    </div>
+                </div>
+                
+                <div class="result-card primary">
+                    <h3>✨ আপনার ৩ মাসের মুনাফা (ট্যাক্স বাদে) ✨</h3>
+                    <div class="value" id="threeMonthProfit">৳ 0.00</div>
+                </div>
+                
+                <div class="result-card success">
+                    <h3>🎯 মোট পরিমাণ (৩ মাস পর)</h3>
+                    <div class="value" id="totalAmount">৳ 0.00</div>
+                </div>
+                
+                <div class="info-note">
+                    <strong>📌 হিসাবের ব্যাখ্যা:</strong>
+                    এই ক্যালকুলেটরে প্রথমে বার্ষিক হার অনুযায়ী মুনাফা হিসাব করা হয়, তারপর সেই মুনাফা থেকে ১০% ট্যাক্স বাদ দেওয়া হয়, এবং সবশেষে ট্যাক্স বাদে বার্ষিক মুনাফাকে ১২ দিয়ে ভাগ করে ৩ দিয়ে গুণ করে ৩ মাসের মুনাফা বের করা হয়।
+                </div>
+            </div>
+        </div>
+        
+        <div class="terms-card">
+            <div class="terms-header">
+                <h2>📜 মুনাফা পাওয়ার শর্তসমূহ</h2>
+            </div>
+            <div class="terms-content">
+                <ul>
+                    <li>মুনাফা পেতে হলে, গ্রাহকের একাউন্টটি <strong>ফুল প্রোফাইল</strong> থাকতে হবে এবং একাউন্ট-এর মুনাফা অপশানটি <strong>"অন"</strong> থাকতে হবে।</li>
+                    
+                    <li><strong>"ইসলামিক" প্রোফাইল</strong>-এর নগদ গ্রাহক মুনাফা পাবে না।</li>
+                    
+                    <li>মুনাফার টাকা প্রদানের সময় যদি গ্রাহকের মুনাফা অপশানটি <strong>"অফ"</strong> থাকে তবে তিনি মুনাফা পাবেন না।</li>
+                    
+                    <li>মাসে <strong>ন্যূনতম দুই (২) বার</strong> আর্থিক লেনদেন (ক্যাশ ইন, ক্যাশ আউট, যে কোন ধরনের পেমেন্ট অথবা মোবাইল রিচার্জ) করতে হবে।</li>
+                    
+                    <li>মাস জুড়ে প্রতি দিন শেষে <strong>ন্যূনতম ৫,০০০ টাকা</strong> ব্যালেন্স রাখতে হবে।</li>
+                    
+                    <li>যদি কোনও দিনের শেষে ব্যালেন্স ৫,০০০ টাকার নিচে থাকে তবে গ্রাহক সেই মাসে মুনাফা পাওয়ার জন্য <strong>যোগ্য হবে না</strong>।</li>
+                    
+                    <li>মাসের সর্বনিম্ন 'দিন শেষের ব্যালেন্স' এর উপর নির্ভর করে গ্রাহকের মুনাফার জন্য প্রযোজ্য বার্ষিক হার/রেট নির্ধারণ করা হবে এবং সেই রেট অনুযায়ী <strong>মাসিক গড় ব্যালেন্স (monthly average balance)</strong> এর উপর মুনাফা হিসাব করা হবে।</li>
+                </ul>
+                
+                <div class="example-box">
+                    <strong>📝 উদাহরণ:</strong>
+                    <p>জানুয়ারি মাসের ৩১ দিনের মধ্যে ৩০ দিন শেষে আপনার একাউন্টে ৬০,০০০ টাকা করে ছিল এবং ১ দিন শেষে ৫,০০০ টাকা ছিল। এক্ষেত্রে আপনার মুনাফার হার/রেট হবে ১.৫% (যেহেতু মাসের এক দিন আপনার দিন শেষের ব্যালেন্স ছিল ৫,০০০ টাকা এবং ৫,০০০ টাকার রেট ১.৫%)।</p>
+                </div>
+                
+                <ul>
+                    <li>আপনার প্রাপ্য মুনাফার উপর দেশের প্রচলিত আইন অনুযায়ী <strong>১০% উৎসে কর বা উইথহোল্ডিং ট্যাক্স</strong> প্রযোজ্য হবে। দেশের আইন অনুযায়ী প্রযোজ্য কর বা অন্যান্য শুল্ক কর্তনের পর সরাসরি নগদ অ্যাকাউন্টে মুনাফার অংশ যুক্ত হয়ে যাবে।</li>
+                    
+                    <li>এখন থেকে মুনাফা <strong>ত্রৈমাসিক ভিত্তিতে (৩ মাস অন্তর ১ বার)</strong> পাবেন। অর্থাৎ ৩ মাসের মুনাফা একসাথে পরবর্তী মাসে তার নগদ একাউন্টে পাবে এবং মাসের <strong>১০ তারিখের মধ্যে</strong> একাউন্টে মুনাফা যোগ হয়ে যাবে।</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="rate-table-card">
+            <div class="rate-header">
+                <h2>📋 মুনাফার হার তালিকা (বার্ষিক)</h2>
+            </div>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>পরিমাণ সীমা</th>
+                            <th style="text-align: right;">বার্ষিক হার</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>টাকা ০ - ৪,৯৯৯.৯৯</td>
+                            <td>০.০০%</td>
+                        </tr>
+                        <tr>
+                            <td>টাকা ৫,০০০ - ৪৯,৯৯৯.৯৯</td>
+                            <td>১.৫০%</td>
+                        </tr>
+                        <tr>
+                            <td>টাকা ৫০,০০০ - ৯৯,৯৯৯.৯৯</td>
+                            <td>২.৫০%</td>
+                        </tr>
+                        <tr>
+                            <td>টাকা ১,০০,০০০ - ১,৯৯,৯৯৯.৯৯</td>
+                            <td>৩.৫০%</td>
+                        </tr>
+                        <tr>
+                            <td>টাকা ২,০০,০০০ এবং তার উপরে</td>
+                            <td>৭.৫০%</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>© ২০২৫ মুনাফা ক্যালকুলেটর | সকল হিসাব বার্ষিক হার অনুযায়ী করা হয়েছে</p>
+            <p style="margin-top: 10px; font-size: 16px; font-weight: 600;">ওয়েবসাইটটি তৈরি করেছে : মোঃ আবু বক্কর</p>
+        </div>
+    </div>
+    
+    <script>
+        function calculateProfit() {
+            const amount = parseFloat(document.getElementById('amount').value);
+            
+            if (isNaN(amount) || amount < 0) {
+                alert('⚠️ অনুগ্রহ করে সঠিক পরিমাণ লিখুন!');
+                return;
+            }
+            
+            let rate = 0;
+            
+            if (amount < 5000) {
+                rate = 0;
+            } else if (amount < 50000) {
+                rate = 1.5;
+            } else if (amount < 100000) {
+                rate = 2.5;
+            } else if (amount < 200000) {
+                rate = 3.5;
+            } else {
+                rate = 7.5;
+            }
+            
+            const yearlyProfit = (amount * rate) / 100;
+            const taxAmount = yearlyProfit * 0.10;
+            const profitAfterTax = yearlyProfit - taxAmount;
+            const monthlyProfit = profitAfterTax / 12;
+            const threeMonthProfit = profitAfterTax / 12 * 3;
+            const totalAmount = amount + threeMonthProfit;
+            
+            // Format numbers
+            const formatNumber = (num) => {
+                return new Intl.NumberFormat('bn-BD', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }).format(num);
+            };
+            
+            const formatRate = (num) => {
+                return new Intl.NumberFormat('bn-BD', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }).format(num);
+            };
+            
+            // Update results
+            document.getElementById('principalAmount').textContent = '৳ ' + formatNumber(amount);
+            document.getElementById('rateValue').textContent = formatRate(rate) + '%';
+            document.getElementById('yearlyProfit').textContent = '৳ ' + formatNumber(yearlyProfit);
+            document.getElementById('taxAmount').textContent = '৳ ' + formatNumber(taxAmount);
+            document.getElementById('profitAfterTax').textContent = '৳ ' + formatNumber(profitAfterTax);
+            document.getElementById('monthlyProfit').textContent = '৳ ' + formatNumber(monthlyProfit);
+            document.getElementById('threeMonthProfit').textContent = '৳ ' + formatNumber(threeMonthProfit);
+            document.getElementById('totalAmount').textContent = '৳ ' + formatNumber(totalAmount);
+            
+            // Show results with animation
+            document.getElementById('results').classList.add('show');
+            
+            // Smooth scroll to results
+            document.getElementById('results').scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'nearest' 
+            });
+        }
+        
+        // Allow Enter key to calculate
+        document.getElementById('amount').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                calculateProfit();
+            }
+        });
+        
+        // Auto focus on input
+        window.onload = function() {
+            document.getElementById('amount').focus();
+        };
+    </script>
+</body>
+</html>
